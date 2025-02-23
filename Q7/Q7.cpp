@@ -1,118 +1,99 @@
-#include <iostream>
-#include <map>
-#include <vector>
-#include <queue>
-#include <limits>
-#include <string>
-#include <stack>
+#include "Q7.hpp"
 
-using namespace std;
+Map::Map(const Map &M) : data(M.data), adjList(M.adjList) {}
 
-class Map {
-public:
-    map<vector<char>, double> data;
-    map<char, vector<pair<char, double>>> adjList; // Adjacency List
-
-    Map(const Map &M) : data(M.data), adjList(M.adjList) {}
-
-    Map(map<vector<char>, double> m) : data(m) {
-        for (const auto &pair : m) {
-            char u = pair.first[0], v = pair.first[1];
-            double weight = pair.second;
-            adjList[u].push_back({v, weight});
-            adjList[v].push_back({u, weight}); // Undirected graph
-        }
+Map::Map(map<vector<char>, double> m) : data(m) {
+    for (const auto &pair : m) {
+        char u = pair.first[0], v = pair.first[1];
+        double weight = pair.second;
+        adjList[u].push_back({v, weight});
+        adjList[v].push_back({u, weight}); // Undirected graph
     }
+}
 
-    void display() const {
-        for (const auto &pair : data) {
-            for (char c : pair.first) {
-                cout << c << " ";
-            }
-            cout << ": " << pair.second << endl;
+void Map::display() const {
+    for (const auto &pair : data) {
+        for (char c : pair.first) {
+            cout << c << " ";
         }
+        cout << ": " << pair.second << endl;
     }
+}
 
-    // Dijkstra's Algorithm for shortest path
-    map<char, pair<double, char>> shortestPath(char start) {
-        map<char, double> distances;
-        map<char, char> parent;
-        
-        for (const auto &node : adjList) {
-            distances[node.first] = numeric_limits<double>::max();
-        }
-        distances[start] = 0;
+map<char, pair<double, char>> Map::shortestPath(char start) {
+    map<char, double> distances;
+    map<char, char> parent;
 
-        priority_queue<pair<double, char>, vector<pair<double, char>>, greater<>> pq;
-        pq.push({0, start});
+    for (const auto &node : adjList) {
+        distances[node.first] = numeric_limits<double>::max();
+    }
+    distances[start] = 0;
 
-        while (!pq.empty()) {
-            auto [currentDist, currentNode] = pq.top();
-            pq.pop();
+    priority_queue<pair<double, char>, vector<pair<double, char>>, greater<>> pq;
+    pq.push({0, start});
 
-            for (auto &[neighbor, weight] : adjList[currentNode]) {
-                double newDist = currentDist + weight;
-                if (newDist < distances[neighbor]) {
-                    distances[neighbor] = newDist;
-                    parent[neighbor] = currentNode;
-                    pq.push({newDist, neighbor});
-                }
+    while (!pq.empty()) {
+        auto [currentDist, currentNode] = pq.top();
+        pq.pop();
+
+        for (auto &[neighbor, weight] : adjList[currentNode]) {
+            double newDist = currentDist + weight;
+            if (newDist < distances[neighbor]) {
+                distances[neighbor] = newDist;
+                parent[neighbor] = currentNode;
+                pq.push({newDist, neighbor});
             }
         }
-
-        map<char, pair<double, char>> result;
-        for (const auto &[node, dist] : distances) {
-            result[node] = {dist, parent[node]};
-        }
-        return result;
     }
 
-    string getPath(map<char, pair<double, char>> &dijkstraData, char start, char end) {
-        if (dijkstraData.find(end) == dijkstraData.end() || dijkstraData[end].first == numeric_limits<double>::max()) {
-            return "No path found";
-        }
-
-        stack<char> pathStack;
-        char node = end;
-        while (node != start) {
-            pathStack.push(node);
-            node = dijkstraData[node].second;
-        }
-        pathStack.push(start);
-
-        string path = "";
-        while (!pathStack.empty()) {
-            path += pathStack.top();
-            pathStack.pop();
-            if (!pathStack.empty()) path += ">";
-        }
-        return path;
+    map<char, pair<double, char>> result;
+    for (const auto &[node, dist] : distances) {
+        result[node] = {dist, parent[node]};
     }
-};
+    return result;
+}
 
-class Orders {
-public:
-    Orders() = default;
-    Orders(const Orders &O) : data(O.data) {}
-    Orders(map<char, int> m) : data(m) {}
-
-    void emplace(char c, int i) {
-        data.emplace(c, i);
+string Map::getPath(map<char, pair<double, char>> &dijkstraData, char start, char end) {
+    if (dijkstraData.find(end) == dijkstraData.end() || dijkstraData[end].first == numeric_limits<double>::max()) {
+        return "No path found";
     }
 
-    using iterator = map<char, int>::iterator;
-    iterator begin() {
-        return data.begin();
+    stack<char> pathStack;
+    char node = end;
+    while (node != start) {
+        pathStack.push(node);
+        node = dijkstraData[node].second;
     }
-    iterator end() {
-        return data.end();
+    pathStack.push(start);
+
+    string path = "";
+    while (!pathStack.empty()) {
+        path += pathStack.top();
+        pathStack.pop();
+        if (!pathStack.empty()) path += ">";
     }
+    return path;
+}
 
-private:
-    map<char, int> data;
-};
+Orders::Orders() = default;
 
-Orders GenerateOrders(int n = 5) {
+Orders::Orders(const Orders &O) : data(O.data) {}
+
+Orders::Orders(map<char, int> m) : data(m) {}
+
+void Orders::emplace(char c, int i) {
+    data.emplace(c, i);
+}
+
+Orders::iterator Orders::begin() {
+    return data.begin();
+}
+
+Orders::iterator Orders::end() {
+    return data.end();
+}
+
+Orders GenerateOrders(int n) {
     Orders M;
     for (int i = 0; i < n; i++) {
         M.emplace(char(97 + rand() % 10), rand() % 2 + 1);
@@ -150,9 +131,6 @@ int main() {
     orders = GenerateOrders(10);
     DisplayOrders(orders);
 
-    // cout << "Map 1:" << endl;
-    // map1.display();
-
     // Compute shortest paths from 's'
     char start = 's';
     map<char, pair<double, char>> shortestPaths = map1.shortestPath(start);
@@ -165,4 +143,4 @@ int main() {
     }
 
     return 0;
-};
+}
