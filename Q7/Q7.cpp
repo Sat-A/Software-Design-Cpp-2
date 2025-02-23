@@ -127,8 +127,14 @@ int main() {
     };
 
     Map map1(m);
+    cout << "Input Map: " << endl;
+    map1.display();
+    cout << endl;
+    
     Orders orders;
     orders = GenerateOrders(10);
+
+    cout << "Orders: " << endl;
     DisplayOrders(orders);
 
     // Compute shortest paths from 's'
@@ -141,6 +147,7 @@ int main() {
         char destination = it->first;
         cout << "Order to " << destination << ": " << map1.getPath(shortestPaths, start, destination) << endl;
     }
+    cout << endl;
 
     return 0;
 }
