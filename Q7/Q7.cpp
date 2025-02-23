@@ -1,7 +1,9 @@
 #include "Q7.hpp"
 
+// Copy constructor for Map class
 Map::Map(const Map &M) : data(M.data), adjList(M.adjList) {}
 
+// Constructor for Map class that initializes the adjacency list
 Map::Map(map<vector<char>, double> m) : data(m) {
     for (const auto &pair : m) {
         char u = pair.first[0], v = pair.first[1];
@@ -11,6 +13,7 @@ Map::Map(map<vector<char>, double> m) : data(m) {
     }
 }
 
+// Display the map data
 void Map::display() const {
     for (const auto &pair : data) {
         for (char c : pair.first) {
@@ -20,15 +23,18 @@ void Map::display() const {
     }
 }
 
+// Compute the shortest path from the start node using Dijkstra's algorithm
 map<char, pair<double, char>> Map::shortestPath(char start) {
     map<char, double> distances;
     map<char, char> parent;
 
+    // Initialize distances to infinity
     for (const auto &node : adjList) {
         distances[node.first] = numeric_limits<double>::max();
     }
     distances[start] = 0;
 
+    // Priority queue to store the nodes to be processed
     priority_queue<pair<double, char>, vector<pair<double, char>>, greater<>> pq;
     pq.push({0, start});
 
@@ -36,6 +42,7 @@ map<char, pair<double, char>> Map::shortestPath(char start) {
         auto [currentDist, currentNode] = pq.top();
         pq.pop();
 
+        // Update distances for neighbors
         for (auto &[neighbor, weight] : adjList[currentNode]) {
             double newDist = currentDist + weight;
             if (newDist < distances[neighbor]) {
@@ -46,6 +53,7 @@ map<char, pair<double, char>> Map::shortestPath(char start) {
         }
     }
 
+    // Prepare the result map
     map<char, pair<double, char>> result;
     for (const auto &[node, dist] : distances) {
         result[node] = {dist, parent[node]};
@@ -53,6 +61,7 @@ map<char, pair<double, char>> Map::shortestPath(char start) {
     return result;
 }
 
+// Get the path from start to end using the data from Dijkstra's algorithm
 string Map::getPath(map<char, pair<double, char>> &dijkstraData, char start, char end) {
     if (dijkstraData.find(end) == dijkstraData.end() || dijkstraData[end].first == numeric_limits<double>::max()) {
         return "No path found";
@@ -66,6 +75,7 @@ string Map::getPath(map<char, pair<double, char>> &dijkstraData, char start, cha
     }
     pathStack.push(start);
 
+    // Construct the path string
     string path = "";
     while (!pathStack.empty()) {
         path += pathStack.top();
@@ -75,24 +85,31 @@ string Map::getPath(map<char, pair<double, char>> &dijkstraData, char start, cha
     return path;
 }
 
+// Default constructor for Orders class
 Orders::Orders() = default;
 
+// Copy constructor for Orders class
 Orders::Orders(const Orders &O) : data(O.data) {}
 
+// Constructor for Orders class that initializes the data
 Orders::Orders(map<char, int> m) : data(m) {}
 
+// Add an order to the data
 void Orders::emplace(char c, int i) {
     data.emplace(c, i);
 }
 
+// Return iterator to the beginning of the orders
 Orders::iterator Orders::begin() {
     return data.begin();
 }
 
+// Return iterator to the end of the orders
 Orders::iterator Orders::end() {
     return data.end();
 }
 
+// Generate random orders
 Orders GenerateOrders(int n) {
     Orders M;
     for (int i = 0; i < n; i++) {
@@ -101,6 +118,7 @@ Orders GenerateOrders(int n) {
     return M;
 }
 
+// Display the orders
 void DisplayOrders(Orders M) {
     Orders::iterator it;
     cout << "House \t Order" << endl;
@@ -110,7 +128,7 @@ void DisplayOrders(Orders M) {
 }
 
 int main() {
-    // Initialise Map
+    // Initialise Map with given data
     map<vector<char>, double> m = {
         {{'s', 'a'}, 0.1},
         {{'s', 'b'}, 0.2},
@@ -131,6 +149,7 @@ int main() {
     map1.display();
     cout << endl;
     
+    // Generate random orders
     Orders orders;
     orders = GenerateOrders(10);
 
